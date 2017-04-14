@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" target-language="da" datatype="plaintext" original="messages" product-name="bolius_setup">
+        <header/>
+        <body>
+         <trans-unit id="tx_boliusstaticdomain_static.label" approved="yes" xml:space="preserve">
+            <target>Brug dette domæne til statiske filer</target>
+         </trans-unit>
+        </body>
+    </file>
+</xliff>

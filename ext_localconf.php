@@ -1,0 +1,11 @@
+<?php
+/**
+ *
+ *
+ */
+$signalSlotDispatcher->connect(
+    \TYPO3\CMS\Core\Resource\ResourceStorage::class,
+    \TYPO3\CMS\Core\Resource\ResourceStorage::SIGNAL_PreGeneratePublicUrl,
+    \Bolius\BoliusBoliusdk\Hooks\ResourcePublicUrlGenerator::class,
+    'generatePublicUrl'
+);
