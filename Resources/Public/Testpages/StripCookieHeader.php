@@ -1,6 +1,6 @@
 <?php
 
-// Attempt to set a cookie. This makes cookie stripping testing easier with a browser.
+// Attempt to send a cookie to the browser.
 setcookie('Test', 'testvalue');
 
 // Explanation
@@ -12,6 +12,10 @@ echo '
  * and "Cookie: no" in case of no cookie header.
  *
  * Used for testing if a server setup strips the "Cookie" header as intended.
+ *
+ * This page also attempts to send a cookie to the browser. Test your setup by testing if this cookie reaches the client
+ * on the domain(s) where it should, and gets removed on the domains where you want it to be removed.
+ *
  */
 
 ';
