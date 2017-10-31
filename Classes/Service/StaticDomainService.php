@@ -91,8 +91,6 @@ class StaticDomainService
      */
     public static function getStaticDomainName()
     {
-        return 'boliusstatic.local:8000';
-
         if (empty(self::$staticDomainName)) {
             if ($domainRecord = self::getStaticDomainRecord()) {
                 self::$staticDomainName = $domainRecord['domainName'];
