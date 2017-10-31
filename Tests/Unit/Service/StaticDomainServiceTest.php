@@ -21,8 +21,12 @@ class StaticDomainServiceTest extends PHPUnit_Framework_TestCase
 
         $this->assertNotEmpty($domainName);
 
-        // without host
+        // without host, relative
         $url = StaticDomainService::appendDomainToUrl('foo/bar.css', 'boliusstatic.dk');
+        $this->assertEquals('//boliusstatic.dk/foo/bar.css', $url);
+
+        // without host, absolute
+        $url = StaticDomainService::appendDomainToUrl('/foo/bar.css', 'boliusstatic.dk');
         $this->assertEquals('//boliusstatic.dk/foo/bar.css', $url);
 
         // with host without forcing
@@ -30,15 +34,15 @@ class StaticDomainServiceTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('//www.bolius.dk/foo/bar.css', $url);
 
         // with host and forcing
-        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', TRUE);
+        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', ['www.bolius.dk']);
         $this->assertEquals('http://boliusstatic.dk/foo/bar.css?t=123#456', $url);
 
         // with host and forcing and removal of scheme
-        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', TRUE, '');
+        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', ['www.bolius.dk'], '');
         $this->assertEquals('//boliusstatic.dk/foo/bar.css?t=123#456', $url);
 
         // with host and forcing and force https
-        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', TRUE, 'https');
+        $url = StaticDomainService::appendDomainToUrl('http://www.bolius.dk/foo/bar.css?t=123#456', 'boliusstatic.dk', ['www.bolius.dk'], 'https');
         $this->assertEquals('https://boliusstatic.dk/foo/bar.css?t=123#456', $url);
     }
 }

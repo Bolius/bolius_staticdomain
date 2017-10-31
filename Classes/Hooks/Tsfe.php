@@ -1,5 +1,6 @@
 <?php
 namespace Bolius\BoliusStaticdomain\Hooks;
+use Bolius\BoliusStaticdomain\Service\StaticDomainService;
 
 
 /**
@@ -8,14 +9,13 @@ namespace Bolius\BoliusStaticdomain\Hooks;
 class Tsfe
 {
 
+    /**
+     * @param $params
+     * @param $tsfe
+     */
     public function contentPostProc_all(&$params, $tsfe )
     {
-        print_r($params); die;
-    }
-
-    public function contentPostProc_output(&$params, $tsfe )
-    {
-        print_r($params); die;
+        $params['pObj']->content = StaticDomainService::addStaticDomainToAttributesInHtml($params['pObj']->content);
     }
 
 }

@@ -8,16 +8,29 @@ class StaticDomainService
 {
 
     /**
-     * Appends the static domain name to a relative url.
+     * @var string
+     */
+    static $staticDomainName = '';
+
+    /**
+     * Appends/replaces the static domain name to/in any url :
+     * - a relative url (typically used in TYPO3 backend, like "sysext/backend/....")
+     * - an absolute url without host (like "/typo3temp/....")
+     * - an absolute url with host but without scheme (like "//example.com/foo/...")
+     * - an absolute url with host and scheme (like "http://example.com/foo/...")
      *
      * @param $url
      * @param null $domain
      * @param bool $evenIfUrlHasHost
-     * @param null $forceScheme
+     * @param null $forceScheme If set, will replace the scheme from the url with this. Valid are "http", "https", "" or NULL.
      * @return string
      */
-    public static function appendDomainToUrl($url, $domain = NULL, $evenIfUrlHasHost = FALSE, $forceScheme = NULL)
+    public static function appendDomainToUrl($url, $domain = NULL, $config = [])
     {
+        $config += [
+            'addDomain' => TRUE,
+            'replaceDomain' => TRUE,
+        ];
 
         if (!$domain) {
             $domain = self::getStaticDomainName();
@@ -25,49 +38,37 @@ class StaticDomainService
 
         $urlParts = parse_url($url);
 
-        $url = '';
-        if ($forceScheme !== NULL) {
-            $trimmedScheme = trim($forceScheme, ':');
-            $url .= $trimmedScheme;
-            if ($trimmedScheme) {
-                $url .= ':';
+        $newUrlparts = $urlParts;
+
+        /**
+         * Add domain ?
+         */
+        if ($config['addDomain']) {
+            if (empty($urlParts['host'])) {
+                $newUrlparts['host'] = $domain;
             }
-        } else {
-            if (!empty($urlParts['scheme'])) {
-                $url .= trim($urlParts['scheme'], ':') . ':';
+        }
+
+        /**
+         * Replace domain ? - not now
+         */
+        if ($config['replaceDomain']) {
+            if (! empty($urlParts['host'])) {
+                $newUrlparts['host'] = $domain;
             }
-
         }
 
-        // @TODO : not quite sure this logic is correct. Or in correct place.
-        if ($GLOBALS['TSFE']->absRefPrefix == '/') {
-            $url .= '/';
-        } else {
-            $url .= '//';
-        }
+        $url = implode('', [
 
-        if (empty($urlParts['host']) || $evenIfUrlHasHost) {
-            $url .= $domain;
-        } else {
-            $url .= $urlParts['host'];
-        }
+            empty($newUrlparts['scheme']) ? '' : ($newUrlparts['scheme'] . ':'),
+            '//',
+            empty($newUrlparts['host']) ? '' : $newUrlparts['host'],
+            '/' . ltrim($newUrlparts['path'], '/'),
+            empty($newUrlparts['query']) ? '' : ('?' . $newUrlparts['query']),
+            empty($newUrlparts['fragment']) ? '' : ('#' . $newUrlparts['fragment']),
 
-        $path = $_SERVER['REQUEST_URI'];
-        if (preg_match(';/typo3(/|$);', $path)) {
-            $dirname = 'typo3';
-        } else {
-            $dirname = dirname(parse_url($path)['path']);
-        }
 
-        //$url .=  '/' . $dirname . '/' . ltrim($urlParts['path'], '/');
-        $url .=  '/' . ltrim($urlParts['path'], '/');
-
-        if (!empty($urlParts['query'])) {
-            $url .= '?' . $urlParts['query'];
-        }
-        if (!empty($urlParts['fragment'])) {
-            $url .= '#' . $urlParts['fragment'];
-        }
+        ]);
 
         return $url;
     }
@@ -78,6 +79,10 @@ class StaticDomainService
      */
     public static function stripAbsRefPrefixFromUrl ($s)
     {
+        // An extra slash is added somewhere later. To compensate, we remove one here.
+        if (substr($s, 0, 2) == '//') {
+            $s = substr($s, 1);
+        }
         return $s;
     }
 
@@ -86,10 +91,14 @@ class StaticDomainService
      */
     public static function getStaticDomainName()
     {
-        if ($domainRecord = self::getStaticDomainRecord()) {
-            return $domainRecord['domainName'];
+        return 'boliusstatic.local:8000';
+
+        if (empty(self::$staticDomainName)) {
+            if ($domainRecord = self::getStaticDomainRecord()) {
+                self::$staticDomainName = $domainRecord['domainName'];
+            }
         }
-        return FALSE;
+        return self::$staticDomainName;
     }
 
     /**
@@ -109,32 +118,62 @@ class StaticDomainService
 
     public static function addStaticDomainToAttributesInHtml ($param)
     {
+        $config = [
+            'img' => [
+                'src' => [
+                ]
+            ],
+            'link' => [
+                'href' => [
+                ]
+            ],
+            'script' => [
+                'src' => [
+                ]
+            ],
+            'source' => [
+               'srcset' => [
+               ],
+            ],
+        ];
 
         $staticDomain = StaticDomainService::getStaticDomainName();
 
-        $path = $_SERVER['REQUEST_URI'];
-        if (preg_match(';/typo3(/|$);', $path)) {
-            $dirname = 'typo3';
-        } else {
-            $dirname = dirname(parse_url($path)['path']);
-        }
-
-
-        // @TODO : this will fail if a url with host is passed in
-        if (preg_match_all(';((href)|(src))=("(/?)([^"]+)");i', $param, $m, PREG_SET_ORDER)) {
+        // find all tags
+        if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
             foreach ($m as $ma) {
-                if ($ma{5} == '/') {
-                    // absolute
-                    $param = str_replace($ma[4], '"//' . $staticDomain . '/' . trim($dirname, '/') . '/' . $ma[6] . '"', $param);
-                } else {
-                    // relative
-                    $param = str_replace($ma[4], '"//' . $staticDomain . '/' . trim($dirname, '/') . '/' . $ma[6] . '"', $param);
+                $tagName = $ma[1];
+                if (! isset($config[$tagName])) {
+                    continue;
                 }
+                if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
+                    foreach ($attributes as $attribute) {
+                        $attrName = $attribute[1];
+                        $attrValue = $attribute[3];
 
+                        if (isset($config[$tagName][$attrName])) {
+
+                            $go = TRUE;
+
+                            if (is_array($config[$tagName]['if-attr-equals'])) {
+                                foreach ($config[$tagName]['if-attr-equals'] as $attr => $value) {
+                                    if (! preg_match('/' . $attr . '="|\'' . $value . '"|\'', $ma[0])) {
+                                     //   $go = FALSE;
+                                    }
+                                }
+                            }
+
+                            if ($go) {
+                                $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
+                                $param = str_replace('"' . $attrValue . '"', '"' . $new . '"', $param);
+//                                echo "$tagName:$attrName:$attrValue \n  $new \n";
+                            }
+                        }
+                    }
+                }
 
             }
         }
-//                $param = preg_replace(';href="(/?)([^"]+)";i', 'href="//' . $staticDomain . '/' . trim($dirname, '/') . '/\\2"', $param);
 
         return $param;
     }

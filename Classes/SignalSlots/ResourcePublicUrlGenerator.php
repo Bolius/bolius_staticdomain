@@ -1,5 +1,5 @@
 <?php
-namespace Bolius\BoliusBoliusdk\Hooks;
+namespace Bolius\BoliusStaticdomain\Hooks;
 
 use Bolius\BoliusStaticdomain\Service\StaticDomainService;
 use TYPO3\CMS\Core\Resource\Driver\DriverInterface;
@@ -22,10 +22,13 @@ class ResourcePublicUrlGenerator
      */
     public function generatePublicUrl (ResourceStorage $resourceStorage, DriverInterface $driver, ResourceInterface $resourceObject, $relativeToCurrentScript, $urlData)
     {
+        return;
+
         if (! isset($GLOBALS['boliusGeneratingPublicUrl'])) {
             $GLOBALS['boliusGeneratingPublicUrl'] = 1;
             $publicUrl = StaticDomainService::appendDomainToUrl($resourceStorage->getPublicUrl($resourceObject));
             $publicUrl = StaticDomainService::stripAbsRefPrefixFromUrl($publicUrl);
+            echo $publicUrl . "\n";
             $urlData['publicUrl'] = $publicUrl;
             unset($GLOBALS['boliusGeneratingPublicUrl']);
         }
