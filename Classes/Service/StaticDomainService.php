@@ -36,39 +36,42 @@ class StaticDomainService
             $domain = self::getStaticDomainName();
         }
 
-        $urlParts = parse_url($url);
+        if ($domain) {
 
-        $newUrlparts = $urlParts;
+            $urlParts = parse_url($url);
 
-        /**
-         * Add domain ?
-         */
-        if ($config['addDomain']) {
-            if (empty($urlParts['host'])) {
-                $newUrlparts['host'] = $domain;
+            $newUrlparts = $urlParts;
+
+            /**
+             * Add domain ?
+             */
+            if ($config['addDomain']) {
+                if (empty($urlParts['host'])) {
+                    $newUrlparts['host'] = $domain;
+                }
             }
-        }
 
-        /**
-         * Replace domain ? - not now
-         */
-        if ($config['replaceDomain']) {
-            if (! empty($urlParts['host'])) {
-                $newUrlparts['host'] = $domain;
+            /**
+             * Replace domain ? - not now
+             */
+            if ($config['replaceDomain']) {
+                if (! empty($urlParts['host'])) {
+                    $newUrlparts['host'] = $domain;
+                }
             }
+
+            $url = implode('', [
+
+                empty($newUrlparts['scheme']) ? '' : ($newUrlparts['scheme'] . ':'),
+                '//',
+                empty($newUrlparts['host']) ? '' : $newUrlparts['host'],
+                '/' . ltrim($newUrlparts['path'], '/'),
+                empty($newUrlparts['query']) ? '' : ('?' . $newUrlparts['query']),
+                empty($newUrlparts['fragment']) ? '' : ('#' . $newUrlparts['fragment']),
+
+
+            ]);
         }
-
-        $url = implode('', [
-
-            empty($newUrlparts['scheme']) ? '' : ($newUrlparts['scheme'] . ':'),
-            '//',
-            empty($newUrlparts['host']) ? '' : $newUrlparts['host'],
-            '/' . ltrim($newUrlparts['path'], '/'),
-            empty($newUrlparts['query']) ? '' : ('?' . $newUrlparts['query']),
-            empty($newUrlparts['fragment']) ? '' : ('#' . $newUrlparts['fragment']),
-
-
-        ]);
 
         return $url;
     }
