@@ -136,44 +136,61 @@ class StaticDomainService
         ];
 
         $staticDomain = StaticDomainService::getStaticDomainName();
+        if ($staticDomain) {
+            // find all tags
+            if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
+                foreach ($m as $ma) {
+                    $tagName = $ma[1];
+                    if (! isset($config[$tagName])) {
+                        continue;
+                    }
+                    if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
+                        foreach ($attributes as $attribute) {
+                            $attrName = $attribute[1];
+                            $attrValue = $attribute[3];
 
-        // find all tags
-        if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
-            foreach ($m as $ma) {
-                $tagName = $ma[1];
-                if (! isset($config[$tagName])) {
-                    continue;
-                }
-                if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
-                    foreach ($attributes as $attribute) {
-                        $attrName = $attribute[1];
-                        $attrValue = $attribute[3];
+                            if (isset($config[$tagName][$attrName])) {
 
-                        if (isset($config[$tagName][$attrName])) {
+                                $go = TRUE;
 
-                            $go = TRUE;
-
-                            if (is_array($config[$tagName]['if-attr-equals'])) {
-                                foreach ($config[$tagName]['if-attr-equals'] as $attr => $value) {
-                                    if (! preg_match('/' . $attr . '="|\'' . $value . '"|\'', $ma[0])) {
-                                     //   $go = FALSE;
+                                if (is_array($config[$tagName]['if-attr-equals'])) {
+                                    foreach ($config[$tagName]['if-attr-equals'] as $attr => $value) {
+                                        if (! preg_match('/' . $attr . '="|\'' . $value . '"|\'', $ma[0])) {
+                                         //   $go = FALSE;
+                                        }
                                     }
                                 }
-                            }
 
-                            if ($go) {
-                                $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
-                                $param = str_replace('"' . $attrValue . '"', '"' . $new . '"', $param);
-//                                echo "$tagName:$attrName:$attrValue \n  $new \n";
+                                if ($go) {
+                                    $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
+                                    $param = str_replace('"' . $attrValue . '"', '"' . $new . '"', $param);
+    //                                echo "$tagName:$attrName:$attrValue \n  $new \n";
+                                }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
 
         return $param;
     }
 
+    /**
+     * Should static domain functionality be activated in this request ?
+     *
+     * @return bool
+     */
+    public static function isActive ()
+    {
+        if (TYPO3_MODE == 'BE') {
+            return FALSE;
+        }
+
+        // if static domain needs to be deactivated for some reason, add rules here
+        // Could be ip-address, cookies, get parameters etc.
+
+        return TRUE;
+    }
 }

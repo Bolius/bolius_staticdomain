@@ -15,6 +15,7 @@ class Tsfe
      */
     public function contentPostProc_all(&$params, $tsfe )
     {
+        // for now, just content
         $params['pObj']->content = StaticDomainService::addStaticDomainToAttributesInHtml($params['pObj']->content);
     }
 

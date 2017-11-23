@@ -14,19 +14,20 @@ class PageRenderer
      */
     public function postProcess(&$params, $pageRenderer)
     {
-        if (TYPO3_MODE == 'BE') {
+        if (! StaticDomainService::isActive()) {
             return;
         }
 
-        foreach ($params as &$param) {
+        foreach ($params as $key => &$param) {
             if (is_string($param)) {
                 $param = StaticDomainService::addStaticDomainToAttributesInHtml($param);
-
             }
         }
-
     }
 
+    /**
+     * @param $params
+     */
     public function postTransform($params)
     {
 
