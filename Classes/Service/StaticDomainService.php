@@ -29,7 +29,7 @@ class StaticDomainService
     {
         $config += [
             'addDomain' => TRUE,
-            'replaceDomain' => TRUE,
+            'replaceDomain' => FALSE,
         ];
 
         if (!$domain) {
