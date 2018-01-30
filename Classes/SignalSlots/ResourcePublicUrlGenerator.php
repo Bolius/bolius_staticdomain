@@ -22,13 +22,15 @@ class ResourcePublicUrlGenerator
      */
     public function generatePublicUrl (ResourceStorage $resourceStorage, DriverInterface $driver, ResourceInterface $resourceObject, $relativeToCurrentScript, $urlData)
     {
+        return;
 
-        // this is to prevent the signal slot from running in circles
-        if (! isset($GLOBALS['boliusStaticDomainGeneratingPublicUrl'])) {
-            $GLOBALS['boliusStaticDomainGeneratingPublicUrl'] = 1;
+        if (! isset($GLOBALS['boliusGeneratingPublicUrl'])) {
+            $GLOBALS['boliusGeneratingPublicUrl'] = 1;
             $publicUrl = StaticDomainService::appendDomainToUrl($resourceStorage->getPublicUrl($resourceObject));
+            $publicUrl = StaticDomainService::stripAbsRefPrefixFromUrl($publicUrl);
+            echo $publicUrl . "\n";
             $urlData['publicUrl'] = $publicUrl;
-            unset($GLOBALS['boliusStaticDomainGeneratingPublicUrl']);
+            unset($GLOBALS['boliusGeneratingPublicUrl']);
         }
     }
 }
