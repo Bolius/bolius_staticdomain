@@ -56,7 +56,7 @@ class StaticDomainService
              */
             if ($config['replaceDomain']) {
                 if (! empty($urlParts['host'])) {
-                    $newUrlparts['host'] = $domain;
+//                    $newUrlparts['host'] = $domain;
                 }
             }
 
