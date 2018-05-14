@@ -194,6 +194,11 @@ class StaticDomainService
             return FALSE;
         }
 
+        // maybe move this to adinPanel ?
+        if (! empty($GLOBALS['BE_USER'])) {
+            return FALSE;
+        }
+
         // if static domain needs to be deactivated for some reason, add rules here
         // Could be ip-address, cookies, get parameters etc.
 
