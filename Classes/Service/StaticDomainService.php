@@ -136,8 +136,11 @@ class StaticDomainService
                 ]
             ],
             'source' => [
-               'srcset' => [
-               ],
+                'src' => [
+                ],
+                'srcset' => [
+
+                ],
             ],
         ];
 
@@ -200,7 +203,7 @@ class StaticDomainService
         }
 
         // if static domain needs to be deactivated for some reason, add rules here
-        // Could be ip-address, cookies, get parameters etc.
+        // Could be ip-address, TypoScript, cookies, get parameters etc.
 
         return TRUE;
     }
