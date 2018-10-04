@@ -1,5 +1,7 @@
 <?php
 namespace Bolius\BoliusStaticdomain\Service;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class StaticDomainService
@@ -110,16 +112,38 @@ class StaticDomainService
      */
     public static function getStaticDomainRecord()
     {
-        return $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
-            '*',
-            'sys_domain',
-            'tx_boliusstaticdomain_static=1',
-            '',
-            'sorting ASC'
-        );
 
+        if (class_exists('TYPO3\CMS\Core\Database\Query\QueryBuilder')) {
+            // v 9.x
+            /** @var QueryBuilder $queryBuilder */
+            $queryBuilder = GeneralUtility::makeInstance('TYPO3\CMS\Core\Database\ConnectionPool')->getQueryBuilderForTable('sys_domain');
+            $res = $queryBuilder->select('*')
+                ->from('sys_domain')
+                ->where(
+                    $queryBuilder->expr()->eq('tx_boliusstaticdomain_static', 1),
+                    $queryBuilder->expr()->eq('hidden', 0)
+                )
+                ->orderBy('sorting')
+                ->execute()
+                ->fetch();
+
+            return $res;
+        } else {
+            // v 7.x
+            return $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
+                '*',
+                'sys_domain',
+                'tx_boliusstaticdomain_static=1 and not hidden',
+                '',
+                'sorting ASC'
+            );
+        }
     }
 
+    /**
+     * @param $param
+     * @return mixed
+     */
     public static function addStaticDomainToAttributesInHtml ($param)
     {
         $config = [
