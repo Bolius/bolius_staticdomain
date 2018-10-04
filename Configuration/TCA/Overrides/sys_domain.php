@@ -7,7 +7,7 @@ if (!defined('TYPO3_MODE')) {
 $columns = array(
     'tx_boliusstaticdomain_static' => array(
         'exclude' => 0,
-        'label' => 'LLL:EXT:bolius_staticdomain/Resources/Private/Language/da.locallang_db.xlf:tx_boliusstaticdomain_static.label',
+        'label' => 'Use this domain for static resources (img, js, css etc.)',
         'config' => array(
             'type' => 'check',
             'default' => 0
