@@ -12,7 +12,7 @@ class StaticDomainService
     /**
      * @var string
      */
-    static $staticDomainName = '';
+    static $staticDomainNames = [];
 
     /**
      * Appends/replaces the static domain name to/in any url :
@@ -97,47 +97,58 @@ class StaticDomainService
     /**
      * @return bool
      */
-    public static function getStaticDomainName()
+    public static function getStaticDomainName($targetPid)
     {
-        if (empty(self::$staticDomainName)) {
-            if ($domainRecord = self::getStaticDomainRecord()) {
-                self::$staticDomainName = $domainRecord['domainName'];
+        if (empty(self::$staticDomainNames[$targetPid])) {
+            if ($domainRecord = self::getStaticDomainRecord($targetPid)) {
+                self::$staticDomainNames[$targetPid] = $domainRecord['domainName'];
             }
         }
-        return self::$staticDomainName;
+        return self::$staticDomainNames[$targetPid];
     }
 
     /**
      * @return array|FALSE|NULL
      */
-    public static function getStaticDomainRecord()
+    public static function getStaticDomainRecord($targetPid)
     {
+        $rootline = $GLOBALS['TSFE']->sys_page->getRootLine($targetPid);
 
-        if (class_exists('TYPO3\CMS\Core\Database\Query\QueryBuilder')) {
-            // v 9.x
-            /** @var QueryBuilder $queryBuilder */
-            $queryBuilder = GeneralUtility::makeInstance('TYPO3\CMS\Core\Database\ConnectionPool')->getQueryBuilderForTable('sys_domain');
-            $res = $queryBuilder->select('*')
-                ->from('sys_domain')
-                ->where(
-                    $queryBuilder->expr()->eq('tx_boliusstaticdomain_static', 1),
-                    $queryBuilder->expr()->eq('hidden', 0)
-                )
-                ->orderBy('sorting')
-                ->execute()
-                ->fetch();
+        foreach ($rootline as $pageInRootline) {
+            $pidInRootline = $pageInRootline['uid'];
+            if (class_exists('TYPO3\CMS\Core\Database\Query\QueryBuilder')) {
+                // v 9.x
+                /** @var QueryBuilder $queryBuilder */
+                $queryBuilder = GeneralUtility::makeInstance('TYPO3\CMS\Core\Database\ConnectionPool')->getQueryBuilderForTable('sys_domain');
+                $res = $queryBuilder->select('*')
+                    ->from('sys_domain')
+                    ->where(
+                        $queryBuilder->expr()->eq('pid', $pidInRootline),
+                        $queryBuilder->expr()->eq('tx_boliusstaticdomain_static', 1),
+                        $queryBuilder->expr()->eq('hidden', 0)
+                    )
+                    ->orderBy('sorting')
+                    ->execute()
+                    ->fetch();
 
-            return $res;
-        } else {
-            // v 7.x
-            return $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
-                '*',
-                'sys_domain',
-                'tx_boliusstaticdomain_static=1 and not hidden',
-                '',
-                'sorting ASC'
-            );
+                return $res;
+            } else {
+                // v 7.x
+                $domain = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
+                    '*',
+                    'sys_domain',
+                    'tx_boliusstaticdomain_static=1 and not hidden and pid=' . intval($pidInRootline),
+                    '',
+                    'sorting ASC'
+                );
+                if ($domain) {
+                    return $domain;
+                }
+            }
         }
+
+        return FALSE;
+
     }
 
     /**

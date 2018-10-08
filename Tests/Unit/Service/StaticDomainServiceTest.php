@@ -7,18 +7,29 @@ use Bolius\BoliusStaticdomain\Service\StaticDomainService;
 class StaticDomainServiceTest extends PHPUnit_Framework_TestCase
 {
 
+    public function setup ()
+    {
+        $GLOBALS['TSFE']->sys_page = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Frontend\Page\PageRepository::class);
+    }
+
+
     /**
      * @test
      */
     public function testStaticDomainService()
     {
 
-        $domainRecord = StaticDomainService::getStaticDomainRecord();
+        $domainRecord = StaticDomainService::getStaticDomainRecord(1);
         $this->assertInternalType('array', $domainRecord);
 
-        $domainName = StaticDomainService::getStaticDomainName();
+        $domainRecord = StaticDomainService::getStaticDomainRecord(38540);
+        $this->assertInternalType('array', $domainRecord);
+
+        $domainName = StaticDomainService::getStaticDomainName(1);
         $this->assertInternalType('string', $domainName);
 
+        $domainName = StaticDomainService::getStaticDomainName(38540);
+        $this->assertInternalType('string', $domainName);
         $this->assertNotEmpty($domainName);
 
         // without host, relative
