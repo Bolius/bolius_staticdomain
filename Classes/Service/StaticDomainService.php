@@ -35,7 +35,7 @@ class StaticDomainService
         ];
 
         if (!$domain) {
-            $domain = self::getStaticDomainName();
+            $domain = self::getStaticDomainName($GLOBALS['TSFE']->id);
         }
 
         if ($domain) {
@@ -131,7 +131,9 @@ class StaticDomainService
                     ->execute()
                     ->fetch();
 
-                return $res;
+                if ($res) {
+                    return $res;
+                }
             } else {
                 // v 7.x
                 $domain = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
@@ -179,7 +181,7 @@ class StaticDomainService
             ],
         ];
 
-        $staticDomain = StaticDomainService::getStaticDomainName();
+        $staticDomain = StaticDomainService::getStaticDomainName($GLOBALS['TSFE']->id);
         if ($staticDomain) {
             // find all tags
             if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
