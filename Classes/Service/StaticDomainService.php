@@ -238,13 +238,28 @@ class StaticDomainService
      */
     public static function isActive ()
     {
+        // this extension does not work in backend - yet
         if (TYPO3_MODE == 'BE') {
             return FALSE;
         }
 
-        // maybe move this to adinPanel ?
-        if (! empty($GLOBALS['BE_USER'])) {
-            return FALSE;
+        $extConf = $GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['bolius_staticdomain'];
+        if ($extConf) {
+            $extConf = unserialize($extConf);
+
+            if (! empty($extConf['disable'])) {
+                return FALSE;
+            }
+
+            // TYPO3 user is logged in - maybe move this to adminPanel ?
+            if (! empty($extConf['disable_with_be_login']) && ! empty($GLOBALS['BE_USER'])) {
+                return FALSE;
+            }
+
+            // this is where all your visitors are
+            if (! empty($extConf['disable_without_be_login']) && empty($GLOBALS['BE_USER'])) {
+                return FALSE;
+            }
         }
 
         // if static domain needs to be deactivated for some reason, add rules here

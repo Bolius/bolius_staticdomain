@@ -16,7 +16,6 @@ class PageRenderer
      */
     public function postProcess(&$params, $pageRenderer)
     {
-
         if (! StaticDomainService::isActive()) {
             return;
         }
