@@ -170,7 +170,8 @@ class StaticDomainService
             ],
             'script' => [
                 'src' => [
-                ]
+                    'addCrossoriginToTag' => 1,
+                ],
             ],
             'source' => [
                 'src' => [
@@ -209,8 +210,15 @@ class StaticDomainService
 
                                 if ($go) {
                                     $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
-                                    $param = str_replace('"' . $attrValue . '"', '"' . $new . '"', $param);
-    //                                echo "$tagName:$attrName:$attrValue \n  $new \n";
+                                    $newQuoted = '"' . $new . '"';
+
+                                    if (! empty($config[$tagName][$attrName]['addCrossoriginToTag']) && $new != $attrValue) {
+                                        $newQuoted .= ' crossorigin';
+                                    }
+
+                                    $param = str_replace('"' . $attrValue . '"', $newQuoted, $param);
+                                    //                                echo "$tagName:$attrName:$attrValue \n  $new \n";
+
                                 }
                             }
                         }
