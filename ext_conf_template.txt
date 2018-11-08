@@ -1,7 +1,7 @@
 # cat=Settings; type=boolean; label=Extension disabled. Master kill switch.
 disable = 0
 
-# cat=Settings; type=boolean; label=Disable if BE login is present. That's when your editors are viewing web site. Disabling this will reduce caching for editors.
+# cat=Settings; type=boolean; label=Disable if BE login is present. That's when your editors are viewing web site. Disabling this will reduce caching for editors - depending of your setup.
 disable_with_be_login = 0
 
 # cat=Settings; type=boolean; label=Disable if BE login is NOT present. That's all of your visitors. Only disable in case of some problem.

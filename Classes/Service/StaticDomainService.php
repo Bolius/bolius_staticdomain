@@ -1,6 +1,5 @@
 <?php
 namespace Bolius\BoliusStaticdomain\Service;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -118,7 +117,7 @@ class StaticDomainService
             $pidInRootline = $pageInRootline['uid'];
             if (class_exists('TYPO3\CMS\Core\Database\Query\QueryBuilder')) {
                 // v 9.x
-                /** @var QueryBuilder $queryBuilder */
+                /** @var object $queryBuilder */
                 $queryBuilder = GeneralUtility::makeInstance('TYPO3\CMS\Core\Database\ConnectionPool')->getQueryBuilderForTable('sys_domain');
                 $res = $queryBuilder->select('*')
                     ->from('sys_domain')
@@ -183,44 +182,56 @@ class StaticDomainService
         ];
 
         $staticDomain = StaticDomainService::getStaticDomainName($GLOBALS['TSFE']->id);
-        if ($staticDomain) {
-            // find all tags
-            if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
-                foreach ($m as $ma) {
-                    $tagName = $ma[1];
-                    if (! isset($config[$tagName])) {
-                        continue;
-                    }
-                    if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
-                        foreach ($attributes as $attribute) {
-                            $attrName = $attribute[1];
-                            $attrValue = $attribute[3];
+        // find all tags
+        if (preg_match_all(';<([^/][^> ]+)[^>]*>;i', $param, $m, PREG_SET_ORDER)) {
+            foreach ($m as $ma) {
 
-                            if (isset($config[$tagName][$attrName])) {
+                $fullTag = $ma[0];
+                $tagName = $ma[1];
+                if (! isset($config[$tagName])) {
+                    continue;
+                }
+                if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
+                    foreach ($attributes as $attribute) {
+                        $attrName = $attribute[1];
+                        $attrValue = $attribute[3];
 
-                                $go = TRUE;
+                        if (isset($config[$tagName][$attrName])) {
 
-                                if (is_array($config[$tagName]['if-attr-equals'])) {
-                                    foreach ($config[$tagName]['if-attr-equals'] as $attr => $value) {
-                                        if (! preg_match('/' . $attr . '="|\'' . $value . '"|\'', $ma[0])) {
-                                         //   $go = FALSE;
-                                        }
-                                    }
-                                }
-
-                                if ($go) {
-                                    $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
-                                    $newQuoted = '"' . $new . '"';
-
-                                    if (! empty($config[$tagName][$attrName]['addCrossoriginToTag']) && $new != $attrValue) {
-                                        $newQuoted .= ' crossorigin';
-                                    }
-
-                                    $param = str_replace('"' . $attrValue . '"', $newQuoted, $param);
-                                    //                                echo "$tagName:$attrName:$attrValue \n  $new \n";
-
-                                }
+                            $new = $attrValue;
+                            if ($staticDomain) {
+                                $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
                             }
+
+                            $newQuoted = '"' . $new . '"';
+
+                            if (
+                                // configuration says we should add crossorigin
+                                ! empty($config[$tagName][$attrName]['addCrossoriginToTag'])
+                                // url has a hostname
+                                && preg_match(';^(https?:)?//;', $new)
+                                // url does not contain the currently requested hostname
+                                && !stristr($new, $_SERVER['HTTP_HOST'])
+                                // tag does not already contain crossorigin
+                                && !stristr($fullTag, 'crossorigin'))
+                            {
+
+                                $newQuoted .= ' crossorigin';
+
+                            }
+
+                            $newFullTag = str_replace('"' . $attrValue . '"', $newQuoted, $fullTag);
+                            $param = str_replace($fullTag, $newFullTag, $param);
+
+                            if (FALSE) {
+                                print_R([
+                                    'fullTag' =>$fullTag,
+                                    'attrValue' => $attrValue,
+                                    'newUrl' => $new,
+                                    'newFullTag' => $newFullTag,
+                                ]);
+                            }
+
                         }
                     }
 
