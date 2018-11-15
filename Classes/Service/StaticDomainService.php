@@ -271,6 +271,15 @@ class StaticDomainService
             if (! empty($extConf['disable_without_be_login']) && empty($GLOBALS['BE_USER'])) {
                 return FALSE;
             }
+            
+            // exact match on hostnames
+            if (! empty($extConf['disable_on_hostnames'])) {
+                foreach (explode(',', $extConf['disable_on_hostnames']) as $hostname) {
+                    if ($_SERVER['HTTP_HOST'] == trim($hostname)) {
+                        return FALSE;
+                    }
+                }
+            }
         }
 
         // if static domain needs to be deactivated for some reason, add rules here

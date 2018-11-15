@@ -7,3 +7,5 @@ disable_with_be_login = 0
 # cat=Settings; type=boolean; label=Disable if BE login is NOT present. That's all of your visitors. Only disable in case of some problem.
 disable_without_be_login = 0
 
+# cat=Settings; type=string; label=Disable on this/these hostname(s). Separate multiple hostnames with comma.
+disable_on_hostnames = www.example.org
