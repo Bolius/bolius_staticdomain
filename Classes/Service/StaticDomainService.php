@@ -203,6 +203,8 @@ class StaticDomainService
                                 $new = self::appendDomainToUrl($attrValue, $staticDomain, $config[$tagName][$attrName]) ;
                             }
 
+                            $changed = $new != $attrValue;
+
                             $newQuoted = '"' . $new . '"';
 
                             if (
@@ -211,13 +213,11 @@ class StaticDomainService
                                 // url has a hostname
                                 && preg_match(';^(https?:)?//;', $new)
                                 // url does not contain the currently requested hostname
-                                && !stristr($new, $_SERVER['HTTP_HOST'])
+                                && $changed
                                 // tag does not already contain crossorigin
                                 && !stristr($fullTag, 'crossorigin'))
                             {
-
                                 $newQuoted .= ' crossorigin';
-
                             }
 
                             $newFullTag = str_replace('"' . $attrValue . '"', $newQuoted, $fullTag);
