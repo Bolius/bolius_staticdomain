@@ -191,7 +191,8 @@ class StaticDomainService
                 if (! isset($config[$tagName])) {
                     continue;
                 }
-                if (preg_match_all(';([a-z]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
+                // not sure if colon is allowed in attribute name, but vue.js uses it
+                if (preg_match_all(';\W([a-z:]+)=("([^"]+)");i', $ma[0], $attributes, PREG_SET_ORDER)) {
                     foreach ($attributes as $attribute) {
                         $attrName = $attribute[1];
                         $attrValue = $attribute[3];
