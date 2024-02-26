@@ -1,6 +1,3 @@
-
-
-
 plugin.tx_boliusstaticdomain {
     disable = 0
     disableOnBackendLogin = 1

@@ -10,32 +10,21 @@
  * "version" and "dependencies" must not be touched!
  ***************************************************************/
 
-$EM_CONF[$_EXTKEY] = array(
+$EM_CONF['bolius_staticdomain'] = [
     'title'            => 'Bolius Static Domain',
     'description'      => '',
     'category'         => 'frontend',
     'author'           => 'Bolius Digital',
     'author_email'     => 'web@bolius.dk',
     'author_company'   => 'Bolius',
-    'shy'              => '',
-    'priority'         => '',
-    'module'           => '',
     'state'            => 'alpha',
-    'internal'         => '',
-    'uploadfolder'     => '0',
-    'createDirs'       => '',
-    'modify_tables'    => '',
-    'clearCacheOnLoad' => 0,
-    'lockType'         => '',
     'version'          => '0.0.1',
-    'constraints'      => array(
-        'depends'   => array(
-            'typo3'   => '6.0.0-9.9.99',
-        ),
-        'conflicts' => array(),
-        'suggests'  => array(
-        ),
-    ),
-);
-
-?>
+    'constraints'      => [
+        'depends'   => [
+            'typo3' => '6.0.0-11.99.99',
+        ],
+        'conflicts' => [],
+        'suggests'  => [
+        ],
+    ],
+];
