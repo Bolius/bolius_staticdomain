@@ -1,26 +1,29 @@
 <?php
+declare(strict_types=1);
+
 namespace Bolius\BoliusStaticdomain\Hooks;
+
 use Bolius\BoliusStaticdomain\Service\StaticDomainService;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
-
-/**
- * Class Tsfe
- */
 class Tsfe
 {
-
     /**
-     * @param $params
-     * @param $tsfe
+     * Called from \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController->generatePage_postProcessing()
+     * @param mixed $params
+     * @param TypoScriptFrontendController $tsfe
+     * @return void
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function contentPostProc_all(&$params, $tsfe )
+    public function contentPostProc_all(mixed &$params, TypoScriptFrontendController $tsfe): void
     {
-        if (! StaticDomainService::isActive()) {
+        if (!StaticDomainService::isActive()) {
             return;
         }
 
-        // for now, just content
         $params['pObj']->content = StaticDomainService::addStaticDomainToAttributesInHtml($params['pObj']->content);
     }
-
 }
