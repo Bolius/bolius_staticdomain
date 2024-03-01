@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Bolius\BoliusStaticdomain\Service;
 
-use TYPO3\CMS\Core\Utility\RootlineUtility;
-use Bolius\BoliusStaticdomain\Classes\Domain\Repository\SysDomainRepository;
+use Bolius\BoliusStaticdomain\Domain\Repository\SysDomainRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerInterface;
@@ -12,8 +11,9 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\ApplicationType;
-use TYPO3\CMS\Core\Log\LogManagerInterface;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\RootlineUtility;
 
 class StaticDomainService
 {
@@ -63,7 +63,7 @@ class StaticDomainService
             '%s//%s/%s%s%s',
             empty($newUrlParts['scheme']) ? '' : ($newUrlParts['scheme'] . ':'),
             empty($newUrlParts['host']) ? '' : $newUrlParts['host'],
-            ltrim($newUrlParts['path'], '/'),
+            ltrim($newUrlParts['path'] ?? '', '/'),
             empty($newUrlParts['query']) ? '' : ('?' . $newUrlParts['query']),
             empty($newUrlParts['fragment']) ? '' : ('#' . $newUrlParts['fragment'])
         );
@@ -249,8 +249,8 @@ class StaticDomainService
     protected static function getStaticLogger(): LoggerInterface
     {
         if (!self::$logger) {
-            /** @var LogManagerInterface $logManager */
-            $logManager = GeneralUtility::makeInstance(LogManagerInterface::class);
+            /** @var LogManager $logManager */
+            $logManager = GeneralUtility::makeInstance(LogManager::class);
 
             self::$logger = $logManager->getLogger('Bolius.BoliusStaticdomain');
         }

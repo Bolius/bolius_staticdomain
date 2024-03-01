@@ -2,8 +2,8 @@ services:
   _defaults:
     autowire: true
     autoconfigure: true
-    public: false
+    public: true
 
-  Bolius\BoliusStaticdomain\Classes\Domain\Repository\SysDomainRepository:
+  Bolius\BoliusStaticdomain\Domain\Repository\SysDomainRepository:
     arguments:
       $connectionPool: '@TYPO3\CMS\Core\Database\ConnectionPool'

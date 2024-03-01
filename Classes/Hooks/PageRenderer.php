@@ -12,11 +12,11 @@ class PageRenderer
     /**
      * Called from \TYPO3\CMS\Core\Page\PageRenderer->executePostRenderHook()
      * @param mixed $params
-     * @param PageRenderer $pageRenderer
+     * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function postProcess(mixed &$params, PageRenderer $pageRenderer): void
+    public function postProcess(mixed &$params, \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer): void
     {
         if (!StaticDomainService::isActive()) {
             return;
@@ -32,11 +32,11 @@ class PageRenderer
     /**
      * Called from \TYPO3\CMS\Core\Page\PageRenderer->executeRenderPostTransformHook()
      * @param mixed $params
-     * @param PageRenderer $pageRenderer
+     * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function postTransform(mixed &$params, PageRenderer $pageRenderer): void
+    public function postTransform(mixed &$params, \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer): void
     {
         if (!StaticDomainService::isActive()) {
             return;

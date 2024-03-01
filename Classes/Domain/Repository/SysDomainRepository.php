@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Bolius\BoliusStaticdomain\Classes\Domain\Repository;
+namespace Bolius\BoliusStaticdomain\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
