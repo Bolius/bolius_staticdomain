@@ -17,8 +17,6 @@ use TYPO3\CMS\Core\Utility\RootlineUtility;
 
 class StaticDomainService
 {
-    static string|array $staticDomainNames = [];
-
     protected static ?LoggerInterface  $logger                 = null;
     protected static array|string|null $extensionConfiguration = null;
 
@@ -40,7 +38,7 @@ class StaticDomainService
             'replaceDomain' => false,
         ];
 
-        $domain = $domain ?: self::getStaticDomainName($GLOBALS['TSFE']->id);
+        $domain = $domain ?: self::getStaticDomainName();
 
         if (!$domain) {
             return $url;
@@ -84,53 +82,16 @@ class StaticDomainService
     }
 
     /**
-     * @param string|int $targetPid
      * @return bool|string
      */
-    public static function getStaticDomainName(string|int $targetPid): bool|string
+    public static function getStaticDomainName(): bool|string
     {
-        if (empty(self::$staticDomainNames[$targetPid])) {
-            if ($domainRecord = self::getStaticDomainRecord($targetPid)) {
-                self::$staticDomainNames[$targetPid] = $domainRecord['domainName'];
-            }
+        $domain = false;
+        if (!empty(GeneralUtility::getIndpEnv('STATIC_DOMAIN'))) {
+            $domain = GeneralUtility::getIndpEnv('STATIC_DOMAIN');
         }
 
-        return self::$staticDomainNames[$targetPid];
-    }
-
-    /**
-     * Returns a record array or:
-     *  - false - when there has been an error retrieving the record.
-     *  - null - if no record has been found.
-     * @param int $targetPid
-     * @return array|null|false
-     */
-    public static function getStaticDomainRecord(int $targetPid): array|null|false
-    {
-        $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $targetPid)->get();
-
-        if (empty($rootLine)) {
-            return null;
-        }
-
-        try {
-            /** @var SysDomainRepository $sysDomainRepository */
-            $sysDomainRepository = GeneralUtility::makeInstance(SysDomainRepository::class);
-
-            foreach ($rootLine as $pageInRootLine) {
-                $result = $sysDomainRepository->getRecordByPid($pageInRootLine['uid']);
-
-                if ($result) {
-                    return $result;
-                }
-            }
-        } catch (Exception|DBALException $e) {
-            self::getStaticLogger()->error($e->getMessage());
-
-            return false;
-        }
-
-        return null;
+        return $domain;
     }
 
     /**
@@ -144,7 +105,7 @@ class StaticDomainService
         }
 
         $config = self::getConfig();
-        $staticDomain = self::getStaticDomainName($GLOBALS['TSFE']->id);
+        $staticDomain = self::getStaticDomainName();
 
         // find all tags
         foreach ($matches as $match) {
