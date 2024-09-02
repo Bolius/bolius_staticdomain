@@ -1,0 +1,25 @@
+{
+    "name": "bolius/bolius-staticdomain",
+    "type": "typo3-cms-extension",
+    "description": "Bolius static domain extension - Rewrites URLs to static resources to a different domain.",
+    "license": ["GPL-2.0+"],
+    "authors": [
+        {
+            "name": "Bolius Digital",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bolius\\BoliusStaticdomain\\": "Classes"
+        }
+    },
+    "replace": {
+        "typo3-ter/bolius-staticdomain": "self.version"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "bolius_staticdomain"
+        }
+    }
+}

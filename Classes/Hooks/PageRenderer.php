@@ -1,22 +1,24 @@
 <?php
-namespace Bolius\BoliusStaticdomain\Hooks;
-use Bolius\BoliusStaticdomain\Service\StaticDomainService;
+declare(strict_types=1);
 
-/**
- * Class PageRendererPostProcess
- */
+namespace Bolius\BoliusStaticdomain\Hooks;
+
+use Bolius\BoliusStaticdomain\Service\StaticDomainService;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+
 class PageRenderer
 {
-
     /**
      * Called from \TYPO3\CMS\Core\Page\PageRenderer->executePostRenderHook()
-     *
-     * @param $params
-     * @param $pageRenderer
+     * @param mixed $params
+     * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function postProcess(&$params, $pageRenderer)
+    public function postProcess(mixed &$params, \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer): void
     {
-        if (! StaticDomainService::isActive()) {
+        if (!StaticDomainService::isActive()) {
             return;
         }
 
@@ -27,25 +29,25 @@ class PageRenderer
         }
     }
 
-
     /**
      * Called from \TYPO3\CMS\Core\Page\PageRenderer->executeRenderPostTransformHook()
-     *
-     * @param $params
+     * @param mixed $params
+     * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function postTransform(&$params, $pageRenderer)
+    public function postTransform(mixed &$params, \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer): void
     {
-        if (! StaticDomainService::isActive()) {
+        if (!StaticDomainService::isActive()) {
             return;
         }
 
         foreach (['headerData', 'footerData'] as $field) {
-            if (! empty($params[$field])) {
-                foreach ($params[$field] as $k => &$v) {
-                    $v = StaticDomainService::addStaticDomainToAttributesInHtml($v);
+            if (!empty($params[$field])) {
+                foreach ($params[$field] as $key => &$value) {
+                    $value = StaticDomainService::addStaticDomainToAttributesInHtml($value);
                 }
             }
         }
     }
-
 }
